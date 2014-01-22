@@ -9,6 +9,8 @@ module Teabag.Game (
 	teaDestroy
 ) where
 
+import Teabag.Global
+
 import Control.Monad
 
 import SFML.Window
@@ -24,7 +26,10 @@ data Game =
  
 teaInit :: IO Game
 teaInit = do
-	wnd <- createRenderWindow (VideoMode 800 600 32) "Teabag" [SFDefaultStyle] Nothing
+	dataFile <- loadFile teaMainFile
+	name <- liftM unwords $ getOptions dataFile "name"
+	[w, h] <- getOptions dataFile "wind"
+	wnd <- createRenderWindow (VideoMode (read w) (read h) 32) name [SFDefaultStyle] Nothing
 	return $ G_ wnd []
 
 addCallback :: [(EventType, [SFEvent -> Game -> IO ()])] -> EventType -> (SFEvent -> Game -> IO ()) -> [(EventType, [SFEvent -> Game -> IO ()])]
