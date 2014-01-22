@@ -53,25 +53,25 @@ findAndCallFuncs evtType evt game ((t,fs):evts) =
 		findAndCallFuncs evtType evt game evts
 
 renderWindow :: Game -> IO Game
-renderWindow (G_ wnd evts) = do
+renderWindow game@(G_ wnd evts) = do
 	clearRenderWindow wnd black
 	display wnd
-	teaRun (G_ wnd evts)
+	teaRun game
 
 runLoop :: Game -> IO Game
-runLoop (G_ wnd evts) = do
+runLoop game@(G_ wnd evts) = do
 	evt <- pollEvent wnd
 	case evt of
 		Just e -> case e of
-			SFEvtClosed -> findAndCallFuncs TeaClosed e (G_ wnd evts) evts
-			SFEvtKeyPressed _ _ _ _ _ -> findAndCallFuncs TeaKeyPressed e (G_ wnd evts) evts
-			_ -> runLoop (G_ wnd evts)
-		Nothing -> renderWindow (G_ wnd evts)
+			SFEvtClosed -> findAndCallFuncs TeaClosed e game evts
+			SFEvtKeyPressed _ _ _ _ _ -> findAndCallFuncs TeaKeyPressed e game evts
+			_ -> runLoop game
+		Nothing -> renderWindow game
 
 teaRun :: Game -> IO Game
-teaRun (G_ wnd evts) = do
+teaRun game@(G_ wnd evts) = do
 	running <- isWindowOpen wnd
-	if running == False then (return (G_ wnd evts)) else (runLoop (G_ wnd evts))
+	if running == False then (return game) else (runLoop game)
 	
 teaClose :: Game -> IO ()
 teaClose (G_ wnd evts) = close wnd
