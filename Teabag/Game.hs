@@ -30,6 +30,7 @@ module Teabag.Game (
 ) where
 
 import Teabag.Global
+import Teabag.Map
 
 import Control.Monad
 
@@ -87,6 +88,8 @@ teaInit = do
 	dataFile <- loadFile teaMainFile
 	name <- liftM unwords $ getOptions dataFile "name"
 	[w, h] <- getOptions dataFile "wind"
+	[mapName] <- getOptions dataFile "start"
+	loadMap mapName
 	wnd' <- createRenderWindow (VideoMode (read w) (read h) 32) name [SFDefaultStyle] Nothing
 	return $ G_ wnd' []
 
