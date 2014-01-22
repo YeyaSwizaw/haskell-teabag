@@ -11,7 +11,11 @@ getOptions (opt:opts) key = case opt of
 	[] -> getOptions opts key
 	(optKey:optVals) -> if optKey == key then return optVals else getOptions opts key
 
+teaFileExt :: String
 teaFileExt = ".tea"
+
+teaDataDir :: String
 teaDataDir = "data/"
 
+teaMainFile :: String
 teaMainFile = teaDataDir ++ "main" ++ teaFileExt

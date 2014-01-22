@@ -104,7 +104,7 @@ callFuncs :: SFEvent -> Game -> [SFEvent -> Game -> IO ()] -> IO Game
 callFuncs evt game = foldr (\f -> (>>) (f evt game)) (runLoop game) 
 
 findAndCallFuncs :: EventType -> SFEvent -> Game -> [(EventType, [SFEvent -> Game -> IO ()])] -> IO Game
-findAndCallFuncs evtType evt game [] = runLoop game
+findAndCallFuncs _ _ game [] = runLoop game
 findAndCallFuncs evtType evt game ((t, fs) : evts) = 
 	if t == evtType then
 		callFuncs evt game fs
@@ -112,7 +112,7 @@ findAndCallFuncs evtType evt game ((t, fs) : evts) =
 		findAndCallFuncs evtType evt game evts
 
 renderWindow :: Game -> IO Game
-renderWindow game@(G_ wnd evts) = do
+renderWindow game@(G_ wnd _) = do
 	clearRenderWindow wnd black
 	display wnd
 	teaRun game
@@ -125,12 +125,12 @@ runLoop game@(G_ wnd evts) = do
 		Nothing -> renderWindow game
 
 teaRun :: Game -> IO Game
-teaRun game@(G_ wnd evts) = do
+teaRun game@(G_ wnd _) = do
 	running <- isWindowOpen wnd
 	(if not running then return else runLoop) game
 	
 teaClose :: Game -> IO ()
-teaClose (G_ wnd evts) = close wnd
+teaClose (G_ wnd _) = close wnd
 
 teaDestroy :: Game -> IO ()
-teaDestroy (G_ wnd evts) = destroy wnd
+teaDestroy (G_ wnd _) = destroy wnd
