@@ -1,5 +1,25 @@
 module Teabag.Game (
-	EventType(TeaClosed, TeaKeyPressed),
+	EventType(
+		TeaClosed,
+		TeaResized,
+		TeaLostFocus,
+		TeaGainedFocus,
+		TeaTextEntered,
+		TeaKeyPressed,
+		TeaKeyReleased,
+		TeaMouseWheelMoved,
+		TeaMouseButtonPressed,
+		TeaMouseButtonReleased,
+		TeaMouseMoved,
+		TeaMouseEntered,
+		TeaMouseLeft,
+		TeaJoystickButtonPressed,
+		TeaJoystickButtonReleased,
+		TeaJoystickMoved,
+		TeaJoystickConnected,
+		TeaJoystickDisconnected
+	),
+
 	Game(G_),
 	
 	teaInit,
@@ -17,8 +37,24 @@ import SFML.Window
 import SFML.Graphics
 
 data EventType =
-	TeaClosed     |
-	TeaKeyPressed
+	  TeaClosed 
+	| TeaResized
+	| TeaLostFocus
+	| TeaGainedFocus
+	| TeaTextEntered
+	| TeaKeyPressed
+	| TeaKeyReleased
+	| TeaMouseWheelMoved
+	| TeaMouseButtonPressed
+	| TeaMouseButtonReleased
+	| TeaMouseMoved
+	| TeaMouseEntered
+	| TeaMouseLeft
+	| TeaJoystickButtonPressed
+	| TeaJoystickButtonReleased
+	| TeaJoystickMoved
+	| TeaJoystickConnected
+	| TeaJoystickDisconnected
 	deriving (Eq, Show)
 
 data Game = 
@@ -69,8 +105,23 @@ runLoop game@(G_ wnd evts) = do
 	case evt of
 		Just e -> case e of
 			SFEvtClosed -> findAndCallFuncs TeaClosed e game evts
+			SFEvtResized _ _-> findAndCallFuncs TeaResized e game evts
+			SFEvtLostFocus -> findAndCallFuncs TeaLostFocus e game evts
+			SFEvtGainedFocus -> findAndCallFuncs TeaGainedFocus e game evts
+			SFEvtTextEntered _ -> findAndCallFuncs TeaTextEntered e game evts
 			SFEvtKeyPressed _ _ _ _ _ -> findAndCallFuncs TeaKeyPressed e game evts
-			_ -> runLoop game
+			SFEvtKeyReleased _ _ _ _ _ -> findAndCallFuncs TeaKeyReleased e game evts
+			SFEvtMouseWheelMoved _ _ _ -> findAndCallFuncs TeaMouseWheelMoved e game evts
+			SFEvtMouseButtonPressed _ _ _ -> findAndCallFuncs TeaMouseButtonPressed e game evts
+			SFEvtMouseButtonReleased _ _ _ -> findAndCallFuncs TeaMouseButtonReleased e game evts
+			SFEvtMouseMoved _ _ -> findAndCallFuncs TeaMouseMoved e game evts
+			SFEvtMouseEntered -> findAndCallFuncs TeaMouseEntered e game evts
+			SFEvtMouseLeft -> findAndCallFuncs TeaMouseLeft e game evts
+			SFEvtJoystickButtonPressed _ _ -> findAndCallFuncs TeaJoystickButtonPressed e game evts
+			SFEvtJoystickButtonReleased _ _ -> findAndCallFuncs TeaJoystickButtonReleased e game evts
+			SFEvtJoystickMoved _ _ _ -> findAndCallFuncs TeaJoystickMoved e game evts
+			SFEvtJoystickConnected _ -> findAndCallFuncs TeaJoystickConnected e game evts
+			SFEvtJoystickDisconnected _ -> findAndCallFuncs TeaJoystickDisconnected e game evts
 		Nothing -> renderWindow game
 
 teaRun :: Game -> IO Game
