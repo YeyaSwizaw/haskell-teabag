@@ -91,22 +91,21 @@ teaInit = do
 
 addCallback :: [(EventType, [SFEvent -> Game -> IO ()])] -> EventType -> (SFEvent -> Game -> IO ()) -> [(EventType, [SFEvent -> Game -> IO ()])]
 addCallback [] evtType evtCall = [(evtType, [evtCall])]
-addCallback ((t, ls):evts) evtType evtCall = 
+addCallback ((t, ls) : evts) evtType evtCall = 
 	if t == evtType then
-		((t, evtCall:ls):evts)
+		(t, evtCall : ls) : evts
 	else
-		((t, ls):(addCallback evts evtType evtCall))
+		(t, ls) : addCallback evts evtType evtCall
 
 teaBindEvent :: Monad m => Game -> EventType -> (SFEvent -> Game -> IO ()) -> m Game
 teaBindEvent (G_ wnd evts) evtType evtCall = return (G_ wnd (addCallback evts evtType evtCall))
 
 callFuncs :: SFEvent -> Game -> [SFEvent -> Game -> IO ()] -> IO Game
-callFuncs evt game [] = runLoop game
-callFuncs evt game (f:ls) = f evt game >> callFuncs evt game ls
+callFuncs evt game = foldr (\f -> (>>) (f evt game)) (runLoop game) 
 
 findAndCallFuncs :: EventType -> SFEvent -> Game -> [(EventType, [SFEvent -> Game -> IO ()])] -> IO Game
 findAndCallFuncs evtType evt game [] = runLoop game
-findAndCallFuncs evtType evt game ((t,fs):evts) = 
+findAndCallFuncs evtType evt game ((t, fs) : evts) = 
 	if t == evtType then
 		callFuncs evt game fs
 	else 

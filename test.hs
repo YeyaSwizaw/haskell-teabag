@@ -2,8 +2,7 @@ import Teabag.Game
 import SFML.Window
 
 exitGame :: SFEvent -> Game -> IO ()
-exitGame evt game = do
-	teaClose game
+exitGame evt = teaClose
 
 keyPressed :: SFEvent -> Game -> IO ()
 keyPressed (SFEvtKeyPressed code _ _ _ _) game = case code of
