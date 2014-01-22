@@ -25,7 +25,7 @@ data Game =
 teaInit :: IO Game
 teaInit = do
 	wnd <- createRenderWindow (VideoMode 800 600 32) "Teabag" [SFDefaultStyle] Nothing
-	return (G_ wnd [])
+	return $ G_ wnd []
 
 addCallback :: [(EventType, [SFEvent -> Game -> IO ()])] -> EventType -> (SFEvent -> Game -> IO ()) -> [(EventType, [SFEvent -> Game -> IO ()])]
 addCallback [] evtType evtCall = [(evtType, [evtCall])]
@@ -71,7 +71,7 @@ runLoop game@(G_ wnd evts) = do
 teaRun :: Game -> IO Game
 teaRun game@(G_ wnd evts) = do
 	running <- isWindowOpen wnd
-	if running == False then (return game) else (runLoop game)
+	(if running == False then return else runLoop) game
 	
 teaClose :: Game -> IO ()
 teaClose (G_ wnd evts) = close wnd
