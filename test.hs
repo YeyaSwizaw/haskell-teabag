@@ -5,7 +5,7 @@ exitGame :: SFEvent -> Game -> IO ()
 exitGame _ = teaClose
 
 keyPressed :: SFEvent -> Game -> IO ()
-keyPressed (SFEvtKeyPressed code _ _ _ _) game = case code of
+keyPressed evt game = case code evt of
 	KeyQ -> teaClose game
 	KeyEscape -> teaClose game
 	_ -> return ()

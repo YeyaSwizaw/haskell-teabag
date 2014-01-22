@@ -58,7 +58,8 @@ data EventType =
 	deriving (Eq, Show)
 
 data Game = 
-	G_ RenderWindow [(EventType, [SFEvent -> Game -> IO ()])]
+	G_ { wnd :: RenderWindow,
+		 evts :: [(EventType, [SFEvent -> Game -> IO ()])] }
 
 getEvtType :: SFEvent -> EventType
 getEvtType e = case e of
@@ -86,51 +87,51 @@ teaInit = do
 	dataFile <- loadFile teaMainFile
 	name <- liftM unwords $ getOptions dataFile "name"
 	[w, h] <- getOptions dataFile "wind"
-	wnd <- createRenderWindow (VideoMode (read w) (read h) 32) name [SFDefaultStyle] Nothing
-	return $ G_ wnd []
+	wnd' <- createRenderWindow (VideoMode (read w) (read h) 32) name [SFDefaultStyle] Nothing
+	return $ G_ wnd' []
 
 addCallback :: [(EventType, [SFEvent -> Game -> IO ()])] -> EventType -> (SFEvent -> Game -> IO ()) -> [(EventType, [SFEvent -> Game -> IO ()])]
 addCallback [] evtType evtCall = [(evtType, [evtCall])]
-addCallback ((t, ls) : evts) evtType evtCall = 
+addCallback ((t, ls) : evts') evtType evtCall = 
 	if t == evtType then
-		(t, evtCall : ls) : evts
+		(t, evtCall : ls) : evts'
 	else
-		(t, ls) : addCallback evts evtType evtCall
+		(t, ls) : addCallback evts' evtType evtCall
 
 teaBindEvent :: Monad m => Game -> EventType -> (SFEvent -> Game -> IO ()) -> m Game
-teaBindEvent (G_ wnd evts) evtType evtCall = return (G_ wnd (addCallback evts evtType evtCall))
+teaBindEvent game evtType evtCall = return game { evts = addCallback (evts game) evtType evtCall }
 
 callFuncs :: SFEvent -> Game -> [SFEvent -> Game -> IO ()] -> IO Game
 callFuncs evt game = foldr (\f -> (>>) (f evt game)) (runLoop game) 
 
 findAndCallFuncs :: EventType -> SFEvent -> Game -> [(EventType, [SFEvent -> Game -> IO ()])] -> IO Game
 findAndCallFuncs _ _ game [] = runLoop game
-findAndCallFuncs evtType evt game ((t, fs) : evts) = 
+findAndCallFuncs evtType evt game ((t, fs) : evts') = 
 	if t == evtType then
 		callFuncs evt game fs
 	else 
-		findAndCallFuncs evtType evt game evts
+		findAndCallFuncs evtType evt game evts'
 
 renderWindow :: Game -> IO Game
-renderWindow game@(G_ wnd _) = do
-	clearRenderWindow wnd black
-	display wnd
+renderWindow game = do
+	clearRenderWindow (wnd game) black
+	display (wnd game)
 	teaRun game
 
 runLoop :: Game -> IO Game
-runLoop game@(G_ wnd evts) = do
-	evt <- pollEvent wnd
+runLoop game = do
+	evt <- pollEvent (wnd game)
 	case evt of
-		Just e -> findAndCallFuncs (getEvtType e) e game evts
+		Just e -> findAndCallFuncs (getEvtType e) e game (evts game)
 		Nothing -> renderWindow game
 
 teaRun :: Game -> IO Game
-teaRun game@(G_ wnd _) = do
-	running <- isWindowOpen wnd
+teaRun game = do
+	running <- isWindowOpen (wnd game)
 	(if not running then return else runLoop) game
 	
 teaClose :: Game -> IO ()
-teaClose (G_ wnd _) = close wnd
+teaClose game = close $ wnd game
 
 teaDestroy :: Game -> IO ()
-teaDestroy (G_ wnd _) = destroy wnd
+teaDestroy game = destroy $ wnd game
