@@ -3,6 +3,7 @@ module Teabag.Map where
 import Teabag.Global
 
 import SFML.Graphics
+import SFML.System
 
 data Tiledef =
 	T_ { name :: String,
@@ -19,12 +20,14 @@ loadMap mapname = do
 	optsFile <- loadFile $ teaMapFile mapname
 	tiles <- getAllOptions optsFile "tile"
 	tdefs <- mapM createTileDef tiles
-	mapImg <- readImg =<< imageFromFile (teaMapImgFile mapname)
-	print =<< imageSize mapImg
+	mapImg <- checkImg =<< imageFromFile (teaMapImgFile mapname)
+	mapSize@(Vec2u mapW mapH) <- imageSize mapImg
+	print mapSize
+	print =<< for' (\x -> for' (getPixel mapImg x) (fromIntegral mapH)) (fromIntegral mapW)
 	return (M_ tdefs)
 
-readImg :: Maybe Image -> IO Image
-readImg img = case img of
+checkImg :: Maybe Image -> IO Image
+checkImg img = case img of
 	Nothing -> error "Map image not loaded successfuly"
 	Just i -> return i
 

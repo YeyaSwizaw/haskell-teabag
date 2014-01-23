@@ -3,6 +3,18 @@ module Teabag.Global where
 import Control.Monad
 import System.FilePath
 
+for :: (Eq a, Num a) => (a -> a1) -> a -> [a1]
+for f 0 = [f 0]
+for f n = f n : for f (n - 1)
+
+for' :: (Eq a, Num a, Monad m) => (a -> m a1) -> a -> m [a1]
+for' f 0 = do
+	item <- f 0
+	return [item]
+for' f n = do
+	item <- f n
+	liftM ((:) item) (for' f (n - 1))
+
 loadFile :: FilePath -> IO [[String]]
 loadFile filename = do
 	file <- readFile filename
