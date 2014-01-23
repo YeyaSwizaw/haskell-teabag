@@ -16,7 +16,10 @@ data Tiledef =
 
 data Map =
 	M_ { tiledefs :: [Tiledef],
-		 tiletex :: [(String, Texture)] }
+		 tiletex :: [(String, Texture)],
+		 mapTiles :: [[String]],
+		 mapTex :: RenderTexture,
+		 mapSpr :: Sprite }
 
 loadMap :: String -> IO Map
 loadMap mapname = do
@@ -29,9 +32,21 @@ loadMap mapname = do
 	let mapW = fromIntegral $ mapH' - 1
 	let mapH = fromIntegral $ mapW' - 1
 	mapColours <- for' (\x -> for' (getPixel mapImg x) mapH) mapW
-	mapTiles <- readMap tdefs mapColours
-	sprites <- createSprites ttex mapTiles
-	return (M_ tdefs ttex)
+	mTiles <- readMap tdefs mapColours
+	sprites <- createSprites ttex mTiles mapW mapH
+	sprSize <- getGlobalBounds $ head sprites
+	let sprW = round (fwidth sprSize) :: Int
+	let sprH = round (fheight sprSize) :: Int
+	let texW = sprW * fromIntegral mapW'
+	let texH = sprH * fromIntegral mapH'
+	mRenTex <- checkEither =<< createRenderTexture texW texH False
+	clear mRenTex black
+	mapM_ (\s -> drawSprite mRenTex s Nothing) sprites
+	display mRenTex
+	mSpr <- checkEither =<< createSprite
+	mTex <- getRenderTexture mRenTex
+	setTexture mSpr mTex True
+	return $ M_ tdefs ttex mTiles mRenTex mSpr
 
 checkImg :: Maybe Image -> IO Image
 checkImg img = case img of
@@ -58,19 +73,13 @@ loadTileTexture tdef = do
 	tex' <- loadTexture $ teaTileFile $ name tdef
 	return (name tdef, tex')
 
-createSprites :: [(String, Texture)] -> [[String]] -> IO [Sprite]
-createSprites = createSprites' 0
+createSprites :: [(String, Texture)] -> [[String]] -> Int -> Int -> IO [Sprite]
+createSprites _ _ 0 _ = return []
+createSprites ttex (row : tiles) x y = liftM2 (++) (createSpriteRow ttex row x y) (createSprites ttex tiles (x - 1) y)
 
-createSprites' :: Int -> [(String, Texture)] -> [[String]] -> IO [Sprite]
-createSprites' _ _ [] = return [] 
-createSprites' x ttex (row : tiles) = liftM2 (++) (createSpriteRow x ttex row) (createSprites' (x + 1) ttex tiles)
-
-createSpriteRow :: Int -> [(String, Texture)] -> [String] -> IO [Sprite]
-createSpriteRow = createSpriteRow' 0
-
-createSpriteRow' :: Int -> Int -> [(String, Texture)] -> [String] -> IO [Sprite]
-createSpriteRow' _ _ _ [] = return []
-createSpriteRow' x y ttex (tname : row) = case lookup tname ttex of
+createSpriteRow :: [(String, Texture)] -> [String] -> Int -> Int -> IO [Sprite]
+createSpriteRow _ _ _ 0 = return []
+createSpriteRow ttex (tname : row) x y = case lookup tname ttex of
 	Just tex' -> do
 		(Vec2u texW' texH') <- textureSize tex'
 		spr <- checkEither =<< createSprite
@@ -79,8 +88,10 @@ createSpriteRow' x y ttex (tname : row) = case lookup tname ttex of
 		let texH = fromIntegral texH' :: Float
 		let x' = fromIntegral x :: Float
 		let y' = fromIntegral y :: Float
+		print $ texW * x'
+		print $ texH * y'
+		print tname
 		setPosition spr (Vec2f (texW * x') (texH * y'))
-		liftM ((:) spr) (createSpriteRow' x (y + 1) ttex row)
+		liftM ((:) spr) (createSpriteRow ttex row x (y - 1))
 	Nothing -> error $ "Error finding texture for" ++ tname
-	
 	

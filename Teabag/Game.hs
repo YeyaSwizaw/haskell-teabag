@@ -60,7 +60,8 @@ data EventType =
 
 data Game = 
 	G_ { wnd :: RenderWindow,
-		 evts :: [(EventType, [SFEvent -> Game -> IO ()])] }
+		 evts :: [(EventType, [SFEvent -> Game -> IO ()])],
+		 gmap :: Map }
 
 getEvtType :: SFEvent -> EventType
 getEvtType e = case e of
@@ -86,12 +87,12 @@ getEvtType e = case e of
 teaInit :: IO Game
 teaInit = do
 	dataFile <- loadFile teaMainFile
-	name <- liftM unwords $ getOptions dataFile "name"
+	name' <- liftM unwords $ getOptions dataFile "name"
 	[w, h] <- getOptions dataFile "wind"
 	[mapName] <- getOptions dataFile "start"
-	loadMap mapName
-	wnd' <- createRenderWindow (VideoMode (read w) (read h) 32) name [SFDefaultStyle] Nothing
-	return $ G_ wnd' []
+	gmap' <- loadMap mapName
+	wnd' <- createRenderWindow (VideoMode (read w) (read h) 32) name' [SFDefaultStyle] Nothing
+	return $ G_ wnd' [] gmap'
 
 addCallback :: [(EventType, [SFEvent -> Game -> IO ()])] -> EventType -> (SFEvent -> Game -> IO ()) -> [(EventType, [SFEvent -> Game -> IO ()])]
 addCallback [] evtType evtCall = [(evtType, [evtCall])]
@@ -118,6 +119,7 @@ findAndCallFuncs evtType evt game ((t, fs) : evts') =
 renderWindow :: Game -> IO Game
 renderWindow game = do
 	clearRenderWindow (wnd game) black
+	drawSprite (wnd game) (mapSpr (gmap game)) Nothing
 	display (wnd game)
 	teaRun game
 
