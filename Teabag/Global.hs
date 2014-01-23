@@ -3,6 +3,8 @@ module Teabag.Global where
 import Control.Monad
 import System.FilePath
 
+import SFML.Graphics
+
 for :: (Eq a, Num a) => (a -> a1) -> a -> [a1]
 for f 0 = [f 0]
 for f n = f n : for f (n - 1)
@@ -37,6 +39,13 @@ removeHead :: Monad m => [a] -> m [a]
 removeHead [] = return []
 removeHead (_ : t) = return t
 
+loadTexture :: FilePath -> IO Texture
+loadTexture path = checkTex =<< textureFromFile path Nothing
+
+checkTex :: (Monad m, Show a) => Either a a1 -> m a1
+checkTex (Left ex) = error (show ex)
+checkTex (Right tex) = return tex
+
 createPath :: [String] -> String
 createPath [item] = item
 createPath (item : items) = item ++ [pathSeparator] ++ createPath items
@@ -53,6 +62,9 @@ teaDataDir = "data"
 teaMapsDir :: String
 teaMapsDir = "maps"
 
+teaTilesDir :: String
+teaTilesDir = "tiles"
+
 teaMainFile :: String
 teaMainFile = createPath [teaDataDir, "main" ++ teaFileExt]
 
@@ -61,3 +73,6 @@ teaMapFile name = createPath [teaDataDir, teaMapsDir, name ++ teaFileExt]
 
 teaMapImgFile :: String -> String
 teaMapImgFile name = createPath [teaDataDir, teaMapsDir, name ++ teaImgExt]
+
+teaTileFile :: String -> String
+teaTileFile name = createPath [teaDataDir, teaTilesDir, name ++ teaImgExt]
