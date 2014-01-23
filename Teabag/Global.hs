@@ -32,6 +32,9 @@ createPath (item : items) = item ++ [pathSeparator] ++ createPath items
 teaFileExt :: String
 teaFileExt = ".tea"
 
+teaImgExt :: String
+teaImgExt = ".png"
+
 teaDataDir :: String
 teaDataDir = "data"
 
@@ -43,3 +46,6 @@ teaMainFile = createPath [teaDataDir, "main" ++ teaFileExt]
 
 teaMapFile :: String -> String
 teaMapFile name = createPath [teaDataDir, teaMapsDir, name ++ teaFileExt]
+
+teaMapImgFile :: String -> String
+teaMapImgFile name = createPath [teaDataDir, teaMapsDir, name ++ teaImgExt]

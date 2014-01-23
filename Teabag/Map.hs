@@ -18,10 +18,15 @@ loadMap :: String -> IO Map
 loadMap mapname = do
 	optsFile <- loadFile $ teaMapFile mapname
 	tiles <- getAllOptions optsFile "tile"
-	print tiles
 	tdefs <- mapM createTileDef tiles
-	print tdefs
+	mapImg <- readImg =<< imageFromFile (teaMapImgFile mapname)
+	print =<< imageSize mapImg
 	return (M_ tdefs)
+
+readImg :: Maybe Image -> IO Image
+readImg img = case img of
+	Nothing -> error "Map image not loaded successfuly"
+	Just i -> return i
 
 createTileDef :: Monad m => [String] -> m Tiledef
 createTileDef [r', g', b', name', coll, collMap'] = 
