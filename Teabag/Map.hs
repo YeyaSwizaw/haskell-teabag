@@ -22,7 +22,7 @@ loadMap mapname = do
 	tiles <- getAllOptions optsFile "tile"
 	tdefs <- mapM createTileDef tiles
 	ttex <- mapM loadTileTexture tdefs
-	mapImg <- checkImg =<< imageFromFile (teaMapImgFile mapname)
+	mapImg <- loadImage $ teaMapImgFile mapname
 	(Vec2u mapW mapH) <- imageSize mapImg
 	mapColours <- for' (\x -> for' (getPixel mapImg x) (fromIntegral $ mapH - 1)) (fromIntegral $ mapW - 1)
 	mapTiles <- readMap tdefs mapColours

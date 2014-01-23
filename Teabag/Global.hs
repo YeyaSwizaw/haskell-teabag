@@ -39,6 +39,14 @@ removeHead :: Monad m => [a] -> m [a]
 removeHead [] = return []
 removeHead (_ : t) = return t
 
+loadImage :: FilePath -> IO Image
+loadImage path = checkImg =<< imageFromFile path
+
+checkImg :: Maybe Image -> IO Image
+checkImg img = case img of
+	Nothing -> error "Image not loaded successfuly"
+	Just i -> return i
+
 loadTexture :: FilePath -> IO Texture
 loadTexture path = checkTex =<< textureFromFile path Nothing
 
