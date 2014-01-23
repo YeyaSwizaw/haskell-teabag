@@ -48,11 +48,11 @@ checkImg img = case img of
 	Just i -> return i
 
 loadTexture :: FilePath -> IO Texture
-loadTexture path = checkTex =<< textureFromFile path Nothing
+loadTexture path = checkEither =<< textureFromFile path Nothing
 
-checkTex :: (Monad m, Show a) => Either a a1 -> m a1
-checkTex (Left ex) = error (show ex)
-checkTex (Right tex) = return tex
+checkEither :: (Monad m, Show a) => Either a a1 -> m a1
+checkEither (Left ex) = error (show ex)
+checkEither (Right tex) = return tex
 
 createPath :: [String] -> String
 createPath [item] = item

@@ -2,6 +2,8 @@ module Teabag.Map where
 
 import Teabag.Global
 
+import Control.Monad
+
 import SFML.Graphics
 import SFML.System
 
@@ -23,9 +25,12 @@ loadMap mapname = do
 	tdefs <- mapM createTileDef tiles
 	ttex <- mapM loadTileTexture tdefs
 	mapImg <- loadImage $ teaMapImgFile mapname
-	(Vec2u mapW mapH) <- imageSize mapImg
-	mapColours <- for' (\x -> for' (getPixel mapImg x) (fromIntegral $ mapH - 1)) (fromIntegral $ mapW - 1)
+	(Vec2u mapW' mapH') <- imageSize mapImg
+	let mapW = fromIntegral $ mapH' - 1
+	let mapH = fromIntegral $ mapW' - 1
+	mapColours <- for' (\x -> for' (getPixel mapImg x) mapH) mapW
 	mapTiles <- readMap tdefs mapColours
+	sprites <- createSprites ttex mapTiles
 	return (M_ tdefs ttex)
 
 checkImg :: Maybe Image -> IO Image
@@ -52,3 +57,30 @@ loadTileTexture :: Tiledef -> IO (String, Texture)
 loadTileTexture tdef = do
 	tex' <- loadTexture $ teaTileFile $ name tdef
 	return (name tdef, tex')
+
+createSprites :: [(String, Texture)] -> [[String]] -> IO [Sprite]
+createSprites = createSprites' 0
+
+createSprites' :: Int -> [(String, Texture)] -> [[String]] -> IO [Sprite]
+createSprites' _ _ [] = return [] 
+createSprites' x ttex (row : tiles) = liftM2 (++) (createSpriteRow x ttex row) (createSprites' (x + 1) ttex tiles)
+
+createSpriteRow :: Int -> [(String, Texture)] -> [String] -> IO [Sprite]
+createSpriteRow = createSpriteRow' 0
+
+createSpriteRow' :: Int -> Int -> [(String, Texture)] -> [String] -> IO [Sprite]
+createSpriteRow' _ _ _ [] = return []
+createSpriteRow' x y ttex (tname : row) = case lookup tname ttex of
+	Just tex' -> do
+		(Vec2u texW' texH') <- textureSize tex'
+		spr <- checkEither =<< createSprite
+		setTexture spr tex' True
+		let texW = fromIntegral texW' :: Float
+		let texH = fromIntegral texH' :: Float
+		let x' = fromIntegral x :: Float
+		let y' = fromIntegral y :: Float
+		setPosition spr (Vec2f (texW * x') (texH * y'))
+		liftM ((:) spr) (createSpriteRow' x (y + 1) ttex row)
+	Nothing -> error $ "Error finding texture for" ++ tname
+	
+	
