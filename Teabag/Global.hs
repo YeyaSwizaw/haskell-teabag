@@ -1,6 +1,7 @@
 module Teabag.Global where
 
 import Control.Monad
+import System.FilePath
 
 loadFile :: FilePath -> IO [[String]]
 loadFile filename = do
@@ -24,14 +25,21 @@ removeHead :: Monad m => [a] -> m [a]
 removeHead [] = return []
 removeHead (_ : t) = return t
 
+createPath :: [String] -> String
+createPath [item] = item
+createPath (item : items) = item ++ [pathSeparator] ++ createPath items
+
 teaFileExt :: String
 teaFileExt = ".tea"
 
 teaDataDir :: String
-teaDataDir = "data/"
+teaDataDir = "data"
+
+teaMapsDir :: String
+teaMapsDir = "maps"
 
 teaMainFile :: String
-teaMainFile = teaDataDir ++ "main" ++ teaFileExt
+teaMainFile = createPath [teaDataDir, "main" ++ teaFileExt]
 
 teaMapFile :: String -> String
-teaMapFile name = teaDataDir ++ "maps/" ++ name ++ teaFileExt
+teaMapFile name = createPath [teaDataDir, teaMapsDir, name ++ teaFileExt]
