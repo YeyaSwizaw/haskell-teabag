@@ -27,26 +27,36 @@ loadMap mapname = do
 	tiles <- getAllOptions optsFile "tile"
 	tdefs <- mapM createTileDef tiles
 	ttex <- mapM loadTileTexture tdefs
+	(mTiles, mapW, mapH) <- readTiles mapname tdefs
+	sprites <- createSprites ttex mTiles mapW mapH
+	mRenTex <- renderSprites sprites mapW mapH
+	mSpr <- checkEither =<< createSprite
+	mTex <- getRenderTexture mRenTex
+	setTexture mSpr mTex True
+	return $ M_ tdefs ttex mTiles mRenTex mSpr
+
+readTiles :: String -> [Tiledef] -> IO ([[String]], Int, Int)
+readTiles mapname tdefs = do
 	mapImg <- loadImage $ teaMapImgFile mapname
 	(Vec2u mapW' mapH') <- imageSize mapImg
 	let mapW = fromIntegral $ mapH' - 1
 	let mapH = fromIntegral $ mapW' - 1
 	mapColours <- for' (\x -> for' (getPixel mapImg x) mapH) mapW
 	mTiles <- readMap tdefs mapColours
-	sprites <- createSprites ttex mTiles mapW mapH
+	return (mTiles, mapH, mapW)
+
+renderSprites :: [Sprite] -> Int -> Int -> IO RenderTexture
+renderSprites sprites mapW mapH= do
 	sprSize <- getGlobalBounds $ head sprites
 	let sprW = round (fwidth sprSize) :: Int
 	let sprH = round (fheight sprSize) :: Int
-	let texW = sprW * fromIntegral mapW'
-	let texH = sprH * fromIntegral mapH'
+	let texW = sprW * fromIntegral (mapW + 1)
+	let texH = sprH * fromIntegral (mapH + 1)
 	mRenTex <- checkEither =<< createRenderTexture texW texH False
 	clear mRenTex black
 	mapM_ (\s -> drawSprite mRenTex s Nothing) sprites
 	display mRenTex
-	mSpr <- checkEither =<< createSprite
-	mTex <- getRenderTexture mRenTex
-	setTexture mSpr mTex True
-	return $ M_ tdefs ttex mTiles mRenTex mSpr
+	return mRenTex
 
 checkImg :: Maybe Image -> IO Image
 checkImg img = case img of
@@ -88,9 +98,6 @@ createSpriteRow ttex (tname : row) x y = case lookup tname ttex of
 		let texH = fromIntegral texH' :: Float
 		let x' = fromIntegral x :: Float
 		let y' = fromIntegral y :: Float
-		print $ texW * x'
-		print $ texH * y'
-		print tname
 		setPosition spr (Vec2f (texW * x') (texH * y'))
 		liftM ((:) spr) (createSpriteRow ttex row x (y - 1))
 	Nothing -> error $ "Error finding texture for" ++ tname
