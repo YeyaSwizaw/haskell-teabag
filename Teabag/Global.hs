@@ -73,6 +73,12 @@ teaMapsDir = "maps"
 teaTilesDir :: String
 teaTilesDir = "tiles"
 
+teaEntsDir :: String
+teaEntsDir = "entities"
+
+teaSprDir :: String
+teaSprDir = "sprites"
+
 teaMainFile :: String
 teaMainFile = createPath [teaDataDir, "main" ++ teaFileExt]
 
@@ -84,3 +90,9 @@ teaMapImgFile name = createPath [teaDataDir, teaMapsDir, name ++ teaImgExt]
 
 teaTileFile :: String -> String
 teaTileFile name = createPath [teaDataDir, teaTilesDir, name ++ teaImgExt]
+
+teaEntFile :: String -> String
+teaEntFile name = createPath [teaDataDir, teaEntsDir, name ++ teaFileExt]
+
+teaSprFile :: String -> String
+teaSprFile name = createPath [teaDataDir, teaSprDir, name ++ teaImgExt]

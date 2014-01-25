@@ -120,6 +120,7 @@ renderWindow :: Game -> IO Game
 renderWindow game = do
 	clearRenderWindow (wnd game) black
 	drawSprite (wnd game) (mapSpr (gmap game)) Nothing
+	mapM_ (\(_, s) -> drawSprite (wnd game) s Nothing) $ entSprs (gmap game)
 	display (wnd game)
 	teaRun game
 
