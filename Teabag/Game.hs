@@ -103,8 +103,8 @@ addCallback ((t, ls) : evts') evtType evtCall =
 	else
 		(t, ls) : addCallback evts' evtType evtCall
 
-teaBindEvent :: Monad m => Game -> EventType -> (SFEvent -> Game -> IO ()) -> m Game
-teaBindEvent game evtType evtCall = return game { evts = addCallback (evts game) evtType evtCall }
+teaBindEvent :: Monad m => EventType -> (SFEvent -> Game -> IO ()) -> Game -> m Game
+teaBindEvent evtType evtCall game = return game { evts = addCallback (evts game) evtType evtCall }
 
 callFuncs :: SFEvent -> Game -> [SFEvent -> Game -> IO ()] -> IO Game
 callFuncs evt game = foldr (\f -> (>>) (f evt game)) (runLoop game) 
@@ -132,8 +132,8 @@ runLoop game = do
 		Just e -> findAndCallFuncs (getEvtType e) e game (evts game)
 		Nothing -> renderWindow game
 
-teaResizeView :: Game -> Int -> Int -> IO ()
-teaResizeView game w h = setView (wnd game) =<< viewFromRect (FloatRect 0 0 (fromIntegral w) (fromIntegral h))
+teaResizeView :: Int -> Int -> Game -> IO ()
+teaResizeView  w h game = setView (wnd game) =<< viewFromRect (FloatRect 0 0 (fromIntegral w) (fromIntegral h))
 
 teaRun :: Game -> IO Game
 teaRun game = do
