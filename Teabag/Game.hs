@@ -25,6 +25,7 @@ module Teabag.Game (
 	teaInit,
 	teaBindEvent,
 	teaRun,
+	teaResizeView,
 	teaClose,
 	teaDestroy
 ) where
@@ -130,6 +131,9 @@ runLoop game = do
 	case evt of
 		Just e -> findAndCallFuncs (getEvtType e) e game (evts game)
 		Nothing -> renderWindow game
+
+teaResizeView :: Game -> Int -> Int -> IO ()
+teaResizeView game w h = setView (wnd game) =<< viewFromRect (FloatRect 0 0 (fromIntegral w) (fromIntegral h))
 
 teaRun :: Game -> IO Game
 teaRun game = do
