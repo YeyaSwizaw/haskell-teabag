@@ -56,7 +56,7 @@ readTiles mapname tdefs = do
 	return (mTiles, mapH, mapW)
 
 renderSprites :: [Sprite] -> Int -> Int -> IO RenderTexture
-renderSprites sprites mapW mapH= do
+renderSprites sprites mapW mapH = do
 	sprSize <- getGlobalBounds $ head sprites
 	let sprW = round (fwidth sprSize) :: Int
 	let sprH = round (fheight sprSize) :: Int
@@ -121,11 +121,11 @@ loadTileTexture tdef = do
 	return (tname tdef, tex')
 
 createSprites :: [(String, Texture)] -> [[String]] -> Int -> Int -> IO [Sprite]
-createSprites _ _ 0 _ = return []
+createSprites _ [] _ _ = return []
 createSprites ttex (row : tiles) x y = liftM2 (++) (createSpriteRow ttex row x y) (createSprites ttex tiles (x - 1) y)
 
 createSpriteRow :: [(String, Texture)] -> [String] -> Int -> Int -> IO [Sprite]
-createSpriteRow _ _ _ 0 = return []
+createSpriteRow _ [] _ _ = return []
 createSpriteRow ttex (tname' : row) x y = case lookup tname' ttex of
 	Just tex' -> do
 		(Vec2u texW' texH') <- textureSize tex'
