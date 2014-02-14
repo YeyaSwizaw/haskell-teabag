@@ -8,27 +8,31 @@ import SFML.Graphics
 import SFML.System
 
 data Tiledef =
-	T_ { tname :: String,
-		 col :: Color,
-         blocking :: Bool,
-         collMap :: Bool }
-	deriving (Show, Eq)
+	T_
+	{ tname    :: String
+	, col      :: Color
+	, blocking :: Bool
+	, collMap  :: Bool
+	} deriving (Show, Eq)
 
 data Entdef =
-	E_ { ename :: String,
-		 ex :: Int,
-		 ey :: Int }
-	deriving (Show, Eq)
+	E_
+	{ ename :: String
+	, ex    :: Int
+	, ey    :: Int
+	} deriving (Show, Eq)
 
 data Map =
-	M_ { tileDefs :: [Tiledef],
-		 tileTex :: [(String, Texture)],
-		 mapTiles :: [[String]],
-		 mapTex :: RenderTexture,
-		 mapSpr :: Sprite,
-		 entDefs :: [Entdef],
-		 entTex :: [(String, Texture)],
-		 entSprs :: [(String, Sprite)] }
+	M_
+	{ tileDefs :: [Tiledef]
+	, tileTex  :: [(String, Texture)]
+	, mapTiles :: [[String]]
+	, mapTex   :: RenderTexture
+	, mapSpr   :: Sprite
+	, entDefs  :: [Entdef]
+	, entTex   :: [(String, Texture)]
+	, entSprs  :: [(String, Sprite)]
+	}
 
 loadMap :: String -> IO Map
 loadMap mapname = do
